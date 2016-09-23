@@ -1,12 +1,15 @@
 @(message: String, vote:String, email:String)
+@import java.util.Arrays
+@import views.VoteBlock
+
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" xmlns="http://www.w3.org/1999/html">
 <head>
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <!-- The above 3 meta tags *must* come first in the head; any other head content must come *after* these tags -->
-    <title>Bootstrap 101 Template</title>
+    <title>Vote for punjab elections 2017</title>
 
     <!-- Bootstrap -->
     <link href='@routes.Assets.versioned("bootstrap/css/bootstrap.min.css")' rel="stylesheet">
@@ -20,11 +23,18 @@
     <script src="https://www.google.com/recaptcha/api.js" async defer></script>
     <style>
         .btn-radio {
-        width: 100%;
+        float: right;
+        margin-top: 15px;
+        margin-right: 20px;
+        }
+        .vote-label{
+            display : block;
         }
         .img-radio {
         opacity: 0.9;
         margin-bottom: 5px;
+        height : 40px;
+        float :left;
         }
 
         .space-20 {
@@ -32,17 +42,20 @@
         }
     </style>
     <script type="text/javascript">
-        $(function () {
-    $('.btn-radio').click(function(e) {
-        $('.btn-radio').not(this).removeClass('active')
-    		.siblings('input').prop('checked',false)
-            .siblings('.img-radio').css('opacity','0.5');
-    	$(this).addClass('active')
-            .siblings('input').prop('checked',true)
-    		.siblings('.img-radio').css('opacity','1');
-    });
-});
-
+var allowSubmit = false;
+function capcha_filled () {
+    allowSubmit = true;
+}
+function capcha_expired () {
+    allowSubmit = false;
+}
+function check_if_capcha_is_filled () {
+    if(allowSubmit) return true;
+    alert('Fill in the capcha!');
+}
+function make_red(id) {
+ document.getElementById(id).style.color = "red";
+}
     </script>
 </head>
 <body>
@@ -52,40 +65,36 @@
 <!-- Include all compiled plugins (below), or include individual files as needed -->
 <script src='@routes.Assets.versioned("bootstrap/js/bootstrap.min.js")' type="text/javascript"></script>
 
-<script type='text/javascript' src='@routes.Assets.versioned("javascripts/index.js")'></script>
 
 <br />
 <div class="container">
 
     <div class="row">
-        <div class="col-md-8 col-md-offset-2">
-            <h1>Who are you going to vote in Punjab elections 2017?</h1>
-            <form class="form-horizontal well" role="form" method="post">
+        <div class="col-md-6 col-md-offset-3">
+            <form class="form-horizontal well" role="form" method="post" onsubmit="if(allowSubmit) { return true;} else alert('Fill in the capcha!'); make_red('recaptcha'); return false;">
+                <h1>Who are you going to vote in Punjab elections 2017?</h1>
+                    @for(party <- Arrays.asList(new VoteBlock("shiromani-akali-dal-election-symbol.jpg", "sad", "SAD + BJP"),
+                new VoteBlock("Aam-Aadmi-Party-election-symbol.jpg", "aap", "AAP"),
+                new VoteBlock("indian-national-congress-election-symbol.jpg", "congress", "CONGRESS"),
+                new VoteBlock("others.jpg", "other", "Other"))) {
                 <div class="row">
-                    <div class="col-md-3">
-                        <img src="@routes.Assets.versioned("images/shiromani-akali-dal-election-symbol.jpg")" class="img-responsive img-radio">
-                        <button type="button" class="btn btn-primary btn-radio">SAD + BJP</button>
-                        <input name="vote" type="checkbox" id="sad" class="hidden" value="sad">
-                    </div>
-                    <div class="col-md-3">
-                        <img src="@routes.Assets.versioned("images/Aam-Aadmi-Party-election-symbol.jpg")" class="img-responsive img-radio">
-                        <button type="button" class="btn btn-primary btn-radio">AAP</button>
-                        <input name="vote" type="checkbox" id="aap" class="hidden" value="app">
-                    </div>
-                    <div class="col-md-3">
-                        <img src="@routes.Assets.versioned("images/indian-national-congress-election-symbol.jpg")" class="img-responsive img-radio">
-                        <button type="button" class="btn btn-primary btn-radio">Congress (INC)</button>
-                        <input name="vote" type="checkbox" id="inc" class="hidden" value="inc">
-                    </div>
-                    <div class="col-md-3">
-                        <img src="@routes.Assets.versioned("images/others.jpg")" class="img-responsive img-radio">
-                        <button type="button" class="btn btn-primary btn-radio">Other</button>
-                        <input name="vote" type="checkbox" id="others" class="hidden" value="other">
-                    </div>
+                <div class="space-20">
+                        <label for="@party.partyName" class="vote-label">
+                            <div class="col-md-8 btn btn-primary btn-lg btn-block" style="min-height: 70px">
 
+                                <img src="/assets/images/@party.image" class="img-radio">
+                                <span style="font-size: 30px">@party.partyLabel</span>
+                                <input style="margin-top: 15px; margin-right: 20px;" class="btn-radio" name="vote" type="radio" id="@party.partyName" value="@party.partyName">
+                            </div>
+                        </label>
+
+                    </div>
                 </div>
+                }
+
+
                 <div class="row space-20">
-                    <div class="col-md-6 col-md-offset-3">
+                    <div>
                         <div class="form-group">
                             <label for="inputTitle1" class="col-md-4 control-label">Your Email :</label>
                             <div class="col-md-8">
@@ -96,13 +105,18 @@
                 </div>
                 <div class="row space-20">
                     <div class="col-md-6 col-md-offset-3">
-                        <div class="form-group">
+                        <div id="recaptcha" class="form-group">
+                            <span>Captcha :</span>
 
-                            <div class="g-recaptcha" data-sitekey="6LdHBAcUAAAAAPjCpdROvceOUFiDcnZH1u36s_pr"></div>
+                            <div class="g-recaptcha" data-sitekey="6LdHBAcUAAAAAPjCpdROvceOUFiDcnZH1u36s_pr" data-callback="capcha_filled"
+                                 data-expired-callback="capcha_expired"></div>
                         </div>
                     </div>
                 </div>
-                <input type="submit" value="Submit">
+                <div class="row space-20">
+
+                    <input onclick="check_if_capcha_is_filled" type="submit" value="Vote" class="btn btn-primary btn-lg" style="float : right; margin-right: 20px;">
+                </div>
             </form>
         </div>
     </div>

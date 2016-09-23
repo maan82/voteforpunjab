@@ -6,7 +6,10 @@ import play.data.Form;
 import play.data.FormFactory;
 import play.mvc.*;
 
+import views.VoteBlock;
 import views.html.*;
+
+import java.util.Arrays;
 
 /**
  * This controller contains an action to handle HTTP requests
@@ -30,6 +33,7 @@ public class HomeController extends Controller {
     }
 
     public Result post() {
+        Arrays.asList("");
         DynamicForm requestData = formFactory.form().bindFromRequest();
         requestData.get("email");
         requestData.get("vote");
